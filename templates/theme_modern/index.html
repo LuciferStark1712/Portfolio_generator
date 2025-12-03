@@ -93,6 +93,29 @@
         </div>
     </nav>
 
+    <!-- SHARE BAR -->
+    <section class="max-w-6xl mx-auto px-4 pt-4 fade-in">
+        <div class="card rounded-2xl p-4 border border-slate-700/60 flex flex-col md:flex-row gap-3 md:items-center">
+            <p class="text-sm opacity-80">
+                🔗 Share this portfolio:
+            </p>
+            <div class="flex-1 flex gap-2">
+                <input
+                    id="shareUrl"
+                    type="text"
+                    readonly
+                    class="w-full px-3 py-2 rounded-xl text-xs bg-slate-900/70 border border-slate-700/80 overflow-x-auto">
+                <button
+                    type="button"
+                    id="copyShareUrl"
+                    class="px-3 py-2 rounded-xl text-xs bg-blue-500 hover:bg-blue-600">
+                    Copy
+                </button>
+            </div>
+            <span id="copyStatus" class="text-xs opacity-70"></span>
+        </div>
+    </section>
+
     <!-- HERO -->
     <section class="max-w-6xl mx-auto px-4 pt-12 pb-10 fade-up">
         <div class="grid md:grid-cols-2 gap-10 items-center">
@@ -263,7 +286,7 @@
     </section>
 
     <script>
-        // Dark / Light mode toggle
+        // Dark / Light mode toggle + Share link
         function applySavedTheme() {
             const saved = localStorage.getItem("portfolioTheme");
             const body = document.body;
@@ -278,6 +301,7 @@
 
         document.addEventListener("DOMContentLoaded", () => {
             applySavedTheme();
+
             const btn = document.getElementById("themeToggle");
             if (btn) {
                 btn.addEventListener("click", () => {
@@ -286,6 +310,29 @@
                     body.classList.toggle("theme-dark", !isDark);
                     body.classList.toggle("theme-light", isDark);
                     localStorage.setItem("portfolioTheme", !isDark ? "dark" : "light");
+                });
+            }
+
+            // Share URL logic
+            const shareInput = document.getElementById("shareUrl");
+            const copyBtn = document.getElementById("copyShareUrl");
+            const status = document.getElementById("copyStatus");
+
+            if (shareInput) {
+                shareInput.value = window.location.href;
+            }
+
+            if (copyBtn && shareInput && status) {
+                copyBtn.addEventListener("click", async () => {
+                    try {
+                        await navigator.clipboard.writeText(shareInput.value);
+                        status.textContent = "Link copied!";
+                    } catch (err) {
+                        status.textContent = "Failed to copy.";
+                    }
+                    setTimeout(() => {
+                        status.textContent = "";
+                    }, 2000);
                 });
             }
         });
