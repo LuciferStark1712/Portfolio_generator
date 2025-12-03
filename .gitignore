@@ -1,0 +1,45 @@
+# --- Python ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+*.egg-info/
+*.log
+
+# --- Virtual Environment ---
+venv/
+.env/
+.env.bak
+
+# --- macOS ---
+.DS_Store
+
+# --- VSCode ---
+.vscode/
+.history/
+
+# --- Flask / Cache ---
+instance/
+*.db
+*.sqlite
+*.sqlite3
+
+# --- Generated / Output Files ---
+generated_sites/
+__DATA__/
+
+# --- PDFs / Temporary files ---
+*.pdf
+*.tmp
+
+# --- Jupyter (if any) ---
+.ipynb_checkpoints/
+
+# --- PyInstaller / Build ---
+build/
+dist/
+*.spec
+
+# --- Node (if any future use) ---
+node_modules/

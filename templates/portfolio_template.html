@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{{ data.name }} - Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-950 text-gray-200">
+
+<section class="min-h-screen flex flex-col justify-center items-center text-center p-10">
+    <h1 class="text-5xl font-bold">{{ data.name }}</h1>
+    <p class="text-xl mt-4">{{ data.email }} · {{ data.phone }}</p>
+
+    <div class="mt-6 flex gap-6">
+        {% if data.linkedin %}
+            <a href="{{ data.linkedin }}" class="text-blue-400 underline">LinkedIn</a>
+        {% endif %}
+        {% if data.github %}
+            <a href="{{ data.github }}" class="text-blue-400 underline">GitHub</a>
+        {% endif %}
+    </div>
+</section>
+
+<section class="p-10 max-w-4xl mx-auto">
+    <h2 class="text-3xl font-semibold mb-4">Skills</h2>
+    <div class="flex flex-wrap gap-3">
+        {% for s in data.skills %}
+            <span class="px-4 py-2 bg-gray-800 rounded">{{ s }}</span>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="p-10 max-w-4xl mx-auto">
+    <h2 class="text-3xl font-semibold mb-4">Experience</h2>
+    {% for exp in data.experience %}
+        <div class="bg-gray-800 p-6 rounded mb-4">
+            <p class="text-xl font-bold">{{ exp }}</p>
+        </div>
+    {% endfor %}
+</section>
+
+<section class="p-10 max-w-4xl mx-auto bg-gray-900">
+    <h2 class="text-3xl font-semibold mb-4">Projects</h2>
+    {% for proj in data.projects %}
+        <div class="bg-gray-800 p-6 rounded mb-4">
+            <p class="text-xl font-bold">{{ proj }}</p>
+        </div>
+    {% endfor %}
+</section>
+
+</body>
+</html>

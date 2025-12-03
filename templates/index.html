@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Resume Parser</title>
+</head>
+
+<body class="bg-gray-900 text-white">
+    <div class="relative isolate overflow-hidden min-h-screen flex flex-col">
+
+        <!-- Background -->
+        <svg class="absolute inset-0 -z-10 h-full w-full stroke-white/10 
+                    [mask-image:radial-gradient(100%_100%_at_top_right,white,transparent)]"
+            aria-hidden="true">
+            <defs>
+                <pattern id="bg-pattern" width="200" height="200" patternUnits="userSpaceOnUse">
+                    <path d="M.5 200V.5H200" fill="none" />
+                </pattern>
+            </defs>
+            <rect width="100%" height="100%" stroke-width="0" fill="url(#bg-pattern)" />
+        </svg>
+
+        <!-- HERO SECTION -->
+        <div class="mx-auto max-w-7xl px-6 pt-10 pb-16 sm:pb-24 lg:flex lg:px-8 lg:py-32">
+            <div class="mx-auto max-w-2xl lg:max-w-xl lg:pt-10">
+
+                <h1 class="mt-10 text-4xl font-bold tracking-tight text-white sm:text-5xl">
+                    AI Resume Parser → Portfolio Generator
+                </h1>
+
+                <p class="mt-6 text-lg text-gray-300">
+                    Upload your resume, let AI extract your details, and instantly generate a modern portfolio website.
+                </p>
+
+                <!-- Upload Form -->
+                <div class="mt-10">
+                    <form action="/process" method="post" enctype="multipart/form-data" class="w-full">
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <input type="file" name="pdf_doc" accept=".pdf,.doc,.docx"
+                                class="bg-white/10 border border-blue-300 px-4 py-2 rounded-2xl w-full text-slate-400
+                                       file:bg-blue-50 file:text-blue-400 file:rounded-full file:border-0"
+                                required>
+                            <button type="submit"
+                                class="bg-blue-500 px-8 py-2.5 rounded-2xl text-white font-semibold hover:bg-blue-400/90 shadow-lg">
+                                Process
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- RESULT SECTION -->
+        <div class="w-screen pb-10">
+            <div class="flex flex-col justify-center items-center text-white">
+                <div class="max-w-7xl w-full p-8 rounded-2xl bg-gray-800/30 border border-white">
+
+                    {% if data %}
+
+                    <!-- ATS SCORE + IDEAL SCORE -->
+                    <div class="grid md:grid-cols-2 gap-6 mb-10">
+                        <!-- ATS Score Card -->
+                        <div class="rounded-2xl border border-slate-700/70 bg-gray-900/60 p-6">
+                            <h2 class="text-lg font-semibold mb-2">ATS Compatibility Score</h2>
+                            <p class="text-3xl font-bold">
+                                {{ ats_score or 0 }}<span class="text-base font-normal"> / 100</span>
+                            </p>
+
+                            <!-- Progress bar -->
+                            <div class="mt-3 w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                                <div class="h-2 rounded-full"
+                                     style="
+                                        width: {{ ats_score or 0 }}%;
+                                        background:
+                                            {% if (ats_score or 0) >= 85 %}#22c55e
+                                            {% elif (ats_score or 0) >= 70 %}#eab308
+                                            {% else %}#ef4444{% endif %};
+                                     ">
+                                </div>
+                            </div>
+
+                            <p class="mt-3 text-xs text-gray-300">
+                                Higher ATS score means your resume is easier for Applicant Tracking Systems to parse and
+                                match to job descriptions.
+                            </p>
+
+                            <!-- Quick hints (optional, only if ats_details exist) -->
+                            {% if data.ats_details %}
+                            <ul class="mt-4 text-xs space-y-1 text-gray-200">
+                                {% if not data.ats_details.has_experience %}
+                                <li>⚠️ No clear experience section detected.</li>
+                                {% endif %}
+                                {% if not data.ats_details.has_education %}
+                                <li>⚠️ No education section detected.</li>
+                                {% endif %}
+                                {% if not data.ats_details.has_skills %}
+                                <li>⚠️ No skills section detected.</li>
+                                {% endif %}
+                                {% if not data.ats_details.has_objective %}
+                                <li>⚠️ No career objective / summary detected.</li>
+                                {% endif %}
+                            </ul>
+                            {% endif %}
+                        </div>
+
+                        <!-- Ideal Score Card -->
+                        <div class="rounded-2xl border border-slate-700/70 bg-gray-900/60 p-6">
+                            <h2 class="text-lg font-semibold mb-2">Ideal ATS Score</h2>
+                            <p class="text-3xl font-bold">
+                                {{ ideal_score or 90 }}<span class="text-base font-normal"> / 100</span>
+                            </p>
+                            <p class="mt-3 text-xs text-gray-300">
+                                Aim for a score of {{ ideal_score or 90 }} or higher by:
+                            </p>
+                            <ul class="mt-2 text-xs list-disc list-inside text-gray-200 space-y-1">
+                                <li>Having clear sections for skills, education, experience, and projects.</li>
+                                <li>Using simple layouts (no overly fancy columns or graphics).</li>
+                                <li>Including relevant keywords from the job description.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- PARSED JSON DISPLAY -->
+                    <div class="border-t border-gray-700 pt-6">
+                        <h3 class="text-base font-semibold mb-3 text-blue-200">
+                            Parsed Resume Data (raw view)
+                        </h3>
+                        <div id="parsedJson" class="text-sm leading-relaxed"></div>
+                    </div>
+
+                    <!-- Generate Portfolio Button -->
+                    <form id="portfolioForm" action="/create_portfolio" method="POST" class="mt-8 text-center">
+                        <!-- use data_json passed from Flask so it's valid JSON string -->
+                        <input type="hidden" name="parsed_json" value='{{ data_json|e }}'>
+                        <button
+                            class="bg-green-500 px-8 py-3 rounded-xl text-white text-lg font-semibold hover:bg-green-600 shadow-lg">
+                            Generate Portfolio Website
+                        </button>
+                    </form>
+
+                    {% else %}
+
+                    <!-- Default Message -->
+                    <p class="text-gray-400 text-center">
+                        Upload a PDF or DOCX resume to extract details and see your ATS score.
+                    </p>
+
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+
+        <!-- LOADING OVERLAY WHEN GENERATING PORTFOLIO -->
+        <div id="loadingOverlay"
+             class="hidden fixed inset-0 bg-black/70 z-50 flex items-center justify-center">
+            <div class="text-center">
+                <div class="mx-auto mb-4 h-12 w-12 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+                <p class="text-lg text-white">Generating your portfolio...</p>
+            </div>
+        </div>
+
+    </div>
+
+    {% if data %}
+    <script>
+        // Render parsed JSON nicely into the parsedJson div
+        function generateHTML(data) {
+            let html = "<div class='space-y-2'>";
+            for (let key in data) {
+                if (Object.prototype.hasOwnProperty.call(data, key)) {
+                    if (typeof data[key] === 'object' && data[key] !== null) {
+                        html += `<p class="font-semibold text-blue-300 mt-2">${key}:</p>
+                                 <div class='ml-4 border-l border-gray-600 pl-4'>${generateHTML(data[key])}</div>`;
+                    } else {
+                        html += `<p><strong>${key}:</strong> ${data[key]}</p>`;
+                    }
+                }
+            }
+            html += "</div>";
+            return html;
+        }
+
+        const parsedData = {{ data | tojson | safe }};
+        const container = document.getElementById("parsedJson");
+        if (container) {
+            container.innerHTML = generateHTML(parsedData);
+        }
+    </script>
+    {% endif %}
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const form = document.getElementById("portfolioForm");
+            const overlay = document.getElementById("loadingOverlay");
+
+            if (form && overlay) {
+                form.addEventListener("submit", () => {
+                    overlay.classList.remove("hidden");
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
